@@ -13,6 +13,10 @@ const OL_X = [370, 410, 450, 490, 530];
 const Q_POS = [450, 378];
 const F_POS = [425, 408];
 
+// Internal geometry keys (X/B/Y/A/F/Q) never show up in the UI — this maps
+// each one to the short label drawn on the diagram (WR/SR/RB/QB).
+const POS_ABBR = { X: "WR", Y: "WR", B: "SR", A: "SR", F: "RB", Q: "QB" };
+
 function pt(x, y) { return `${x},${y}`; }
 
 const ROUTE_BUILDERS = {
@@ -75,12 +79,12 @@ function buildFieldSVG(play) {
     }
   });
 
-  markers += `<circle cx="${Q_POS[0]}" cy="${Q_POS[1]}" r="9" fill="#e3c9a3" stroke="#2f1c10" stroke-width="2"/>`;
-  markers += `<text x="${Q_POS[0]}" y="${Q_POS[1] + 4}" font-size="10" text-anchor="middle" fill="#2f1c10" font-weight="700">Q</text>`;
+  markers += `<circle cx="${Q_POS[0]}" cy="${Q_POS[1]}" r="13" fill="#e3c9a3" stroke="#2f1c10" stroke-width="2"/>`;
+  markers += `<text x="${Q_POS[0]}" y="${Q_POS[1] + 3.5}" font-size="9" text-anchor="middle" fill="#2f1c10" font-weight="800">${POS_ABBR.Q}</text>`;
 
   if (play.id !== "torch") {
-    markers += `<circle cx="${F_POS[0]}" cy="${F_POS[1]}" r="9" fill="#e3c9a3" stroke="#2f1c10" stroke-width="2"/>`;
-    markers += `<text x="${F_POS[0]}" y="${F_POS[1] + 4}" font-size="10" text-anchor="middle" fill="#2f1c10" font-weight="700">F</text>`;
+    markers += `<circle cx="${F_POS[0]}" cy="${F_POS[1]}" r="13" fill="#e3c9a3" stroke="#2f1c10" stroke-width="2"/>`;
+    markers += `<text x="${F_POS[0]}" y="${F_POS[1] + 3.5}" font-size="9" text-anchor="middle" fill="#2f1c10" font-weight="800">${POS_ABBR.F}</text>`;
   }
 
   (play.routes || []).forEach((r) => {
@@ -91,8 +95,8 @@ function buildFieldSVG(play) {
     const pts = builder(x, r.dir, r.depth, r.quick);
     const dAttr = pts.map((p, i) => (i === 0 ? `M${pt(p[0], p[1])}` : `L${pt(p[0], p[1])}`)).join(" ");
     lines += `<path d="${dAttr}" fill="none" stroke="#fff8f0" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>`;
-    markers += `<circle cx="${x}" cy="${LOS}" r="12" fill="#c68b59" stroke="#2f1c10" stroke-width="2"/>`;
-    markers += `<text x="${x}" y="${LOS + 4}" font-size="11" text-anchor="middle" fill="#2f1c10" font-weight="800">${r.pos}</text>`;
+    markers += `<circle cx="${x}" cy="${LOS}" r="15" fill="#c68b59" stroke="#2f1c10" stroke-width="2"/>`;
+    markers += `<text x="${x}" y="${LOS + 3.5}" font-size="9.5" text-anchor="middle" fill="#2f1c10" font-weight="800">${POS_ABBR[r.pos] || r.pos}</text>`;
   });
 
   // draw LOS line
@@ -152,10 +156,9 @@ function orderedPlays() {
   return PLAYS;
 }
 
-function isUnlocked(index) {
-  if (index === 0) return true;
-  const prev = orderedPlays()[index - 1];
-  return progress.completed.includes(prev.id);
+function isUnlocked() {
+  // Every lesson is open from the start — jump in wherever you want.
+  return true;
 }
 
 function renderHome() {
@@ -174,8 +177,8 @@ function renderHome() {
   units.forEach((u) => {
     unitsHtml += `<div class="unit-header"><span>${u.unitName}</span></div>`;
     unitsHtml += `<div class="path">`;
-    u.items.forEach(({ play, index }, i) => {
-      const unlocked = isUnlocked(index);
+    u.items.forEach(({ play }, i) => {
+      const unlocked = isUnlocked();
       const done = progress.completed.includes(play.id);
       const rowClass = i % 3 === 1 ? "offset-left" : i % 3 === 2 ? "offset-right" : "";
       const nodeClass = done ? "done" : unlocked ? "" : "locked";
@@ -297,8 +300,11 @@ function cardHtml(card) {
     const items = play.assignments
       .map((a) => `
         <div class="assign-item">
-          <div class="pos-badge">${a.pos}</div>
-          <p>${a.text}</p>
+          <div class="pos-badge">${a.abbrev}</div>
+          <div>
+            <div class="role-label">${a.role}</div>
+            <p>${a.text}</p>
+          </div>
         </div>`)
       .join("");
     return `

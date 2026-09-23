@@ -331,8 +331,8 @@ main {
 
 .assign-item .pos-badge {
   flex-shrink: 0;
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--brown-600);
   color: var(--white);
@@ -340,7 +340,17 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 12px;
+  letter-spacing: 0.2px;
+}
+
+.assign-item .role-label {
+  font-weight: 800;
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--brown-700);
+  margin-bottom: 3px;
 }
 
 .assign-item p { margin: 0; font-size: 14.5px; line-height: 1.45; }
